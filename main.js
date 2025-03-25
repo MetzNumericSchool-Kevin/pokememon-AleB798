@@ -11,7 +11,7 @@ async function getRandomPokemons(url, nbOfITems) {
         }
 
         //on utilise la méthode .sort() pur uun trie aléatoire des données
-        const pokemonsAléatoire = data.sort(()=> 0.5 -Math.random());
+        const pokemonsAléatoire = data.sort(()=> 0.5 - Math.random());
 
         //on va retourner x éléments du tableau (pour pouvoir ajuster le nombre de carte par partie)
         
@@ -29,13 +29,40 @@ async function initGame() {
     const pokemons = await getRandomPokemons(url, nbCartes); //variable qui stocke nos pokémons
 
     if(pokemons) {
-        //si on récupère des pokemons on crée un nouveau tableau avec des pairs
-        const pokemonsList = [...pokemons,...pokemons]
-        console.log(pokemonsList)
+        // console.log(pokemonsSelection)
+        createGameGrid(pokemons)
     }
 }
 
 //ajout d'un écouteur d'événement pour prendre compte le choix de l'utilisateur
 document.getElementById("selectCartes").addEventListener("change", initGame);
+
+
+//fonction qui nous permettra de créer dynamiquement les cartes (par pairs et mélangées)
+function createGameGrid(pokemons) {
+
+    //créer les pairs et les mélanger
+    const pokemonsPairs = [...pokemons,...pokemons];
+    pokemonsPairs.sort(()=> 0.5 - Math.random());
+    //console.log(pokemonsPairs)
+
+    //récupération du conteneur de la grille de jeu qui contiendra nos cartes
+    const gameGrid = document.querySelector('#grille_de_jeu');
+    // Réinitialisation de la grille (pour éviter lor de la sélection du nb de carte l'ajout à la suite)
+    gameGrid.innerHTML = ""; 
+    const imageUrl = './assets/bush.webp'
+
+    //création dynamique des cartes
+    pokemonsPairs.forEach(pokemon=> {
+        let card = document.createElement("div")
+        card.classList.add("col", "box")
+        let image = document.createElement("img")
+        image.classList.add("bush")
+        image.setAttribute("src", imageUrl)
+        image.setAttribute("alt", pokemon.name)
+        card.appendChild(image)
+        gameGrid.appendChild(card)
+    })
+}
 
 initGame();

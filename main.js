@@ -37,6 +37,11 @@ async function initGame() {
 //ajout d'un écouteur d'événement pour prendre compte le choix de l'utilisateur
 document.getElementById("selectCartes").addEventListener("change", initGame);
 
+//déclaration des variables pour la logique du jeu
+const defaultImage = "./assets/bush.webp"; // Image par défaut (buisson)
+let firstCard = null; //null car en attente de valeur
+let secondCard = null;
+let lockBoard = false; //empêche de cliquer pendant la vérification
 
 //fonction qui nous permettra de créer dynamiquement les cartes (par pairs et mélangées)
 function createGameGrid(pokemons) {
@@ -54,15 +59,53 @@ function createGameGrid(pokemons) {
 
     //création dynamique des cartes
     pokemonsPairs.forEach(pokemon=> {
+
+        //création des éléments des cartes
         let card = document.createElement("div")
         card.classList.add("col", "box")
-        let image = document.createElement("img")
-        image.classList.add("bush")
-        image.setAttribute("src", imageUrl)
-        image.setAttribute("alt", pokemon.name)
+
+        let image = document.createElement("img");
+        image.classList.add("bush");
+        image.setAttribute("src", defaultImage);
+        image.setAttribute("alt", pokemon.name);
+        //on crée un attribut data-url pour garder l'url du pokemon
+        image.setAttribute("data-url", pokemon.sprite);
+
+        //on rattache les éléments aux parents
         card.appendChild(image)
         gameGrid.appendChild(card)
+
+        //ajout d"un écouteur d'événement sur chaque carte
+        card.addEventListener("click", flippedCard);
     })
 }
+
+//création de la fonction qui va retourner la carte pour afficher le pokémon caché (cette fonction prend en argument l'event)
+function flippedCard(event) {
+    if (lockBoard) return;
+
+    //on récupère la cible du click
+    const target = event.target;
+
+    //vérifie si la carte est déjà retournée pour empêcher de prendre en compte deux fois la même carte
+    if (target === firstCard) return;
+
+    //change l'image pour afficher le Pokémon
+    target.src = target.getAttribute("data-url");
+
+    //avec une condition on indique que si la valeur de firstCard est toujours null alors = target sinon cela veut dire que l'on a déjà attribué une valeur à FirstCard et donc c'est secondCard = target
+    if (firstCard === null) {
+        //première carte retournée = cible
+        firstCard = target;
+    } else {
+        //deuxième carte retournée = cible
+        secondCard = target;
+        lockBoard = true; // Empêche de cliquer sur d'autres cartes
+
+        //vérifie si les cartes correspondent
+        checkCards();
+    }
+}
+
 
 initGame();

@@ -39,9 +39,13 @@ document.getElementById("selectCartes").addEventListener("change", initGame);
 
 //déclaration des variables pour la logique du jeu
 const defaultImage = "./assets/bush.webp"; // Image par défaut (buisson)
+const pokeballImage = "./assets/pokeball.png"; //image si checkCards
 let firstCard = null; //null car en attente de valeur
 let secondCard = null;
 let lockBoard = false; //empêche de cliquer pendant la vérification
+const capturedPokemonBox = document.querySelector('.liste_pokemons_captures');
+let capturedPokemons = []
+const replayBtn = document.querySelector('#rejouer')
 
 //fonction qui nous permettra de créer dynamiquement les cartes (par pairs et mélangées)
 function createGameGrid(pokemons) {
@@ -55,7 +59,6 @@ function createGameGrid(pokemons) {
     const gameGrid = document.querySelector('#grille_de_jeu');
     // Réinitialisation de la grille (pour éviter lor de la sélection du nb de carte l'ajout à la suite)
     gameGrid.innerHTML = ""; 
-    const imageUrl = './assets/bush.webp'
 
     //création dynamique des cartes
     pokemonsPairs.forEach(pokemon=> {
@@ -107,5 +110,51 @@ function flippedCard(event) {
     }
 }
 
+//création de la fonction qui va vérifier si les cartes correspondent
+function checkCards() {
+    if (firstCard.getAttribute("data-url") === secondCard.getAttribute("data-url")) {
+        setTimeout(() => {
+            //quand identique on affiche à la place du pokémon une pokeball
+            firstCard.src = pokeballImage; 
+            secondCard.src = pokeballImage;
+
+            //ajout du pokémon capturé dans le tableau
+            capturedPokemons.push(firstCard.getAttribute("data-url"));
+            
+            //crée l'élément à ajouter au container des pokémons capturés
+            const capturedPokemon = document.createElement("div");
+            capturedPokemon.classList.add(".liste_pokemons_captures");
+            
+            const capturedImage = document.createElement("img");
+            capturedImage.setAttribute("src", firstCard.getAttribute("data-url"));
+            capturedImage.setAttribute("alt", "Pokémon capturé");
+            capturedPokemon.appendChild(capturedImage);
+            
+            //ajout du pokémon capturé dans le container
+            capturedPokemonBox.appendChild(capturedPokemon);
+
+            resetCards();
+
+            //vérifie si tous les pokémons ont été capturés
+            if (capturedPokemons.length === (document.querySelectorAll('.box').length / 2)) {
+                //affichage du bouton pour rejouer
+                replayBtn.style.display = "block";
+            }
+        }, 1000);
+    } else {
+        setTimeout(() => {
+            firstCard.src = defaultImage;
+            secondCard.src = defaultImage;
+            resetCards();
+        }, 1000);
+    }
+}
+
+//création de la fonction qui va permettre de reset les cartes
+function resetCards() {
+    firstCard = null; //null car en attente de valeur
+    secondCard = null;
+    lockBoard = false; //empêche de cliquer pendant la vérification
+}
 
 initGame();
